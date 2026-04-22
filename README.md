@@ -42,7 +42,6 @@ GitHub Pages entry is [index.html](./index.html), which routes directly into the
 
 - [index.html](./index.html): lightweight landing page and GitHub Pages entry point
 - [Virtual-Desktop-Strategy-Readiness-Assessment.html](./Virtual-Desktop-Strategy-Readiness-Assessment.html): main product concept application
-- [LINKEDIN_POST.md](./LINKEDIN_POST.md): ready-to-use public launch copy
 
 ## Positioning
 
