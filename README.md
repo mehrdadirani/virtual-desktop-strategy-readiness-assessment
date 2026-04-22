@@ -1,6 +1,6 @@
 # Virtual Desktop Strategy & Readiness Assessment
 
-Product concept for an interactive desktop virtualization discovery and decision-support experience.
+Product concept for an interactive desktop virtualization assessment and decision-support experience.
 
 ## At a Glance
 
@@ -11,7 +11,7 @@ Product concept for an interactive desktop virtualization discovery and decision
 
 ## Overview
 
-This project reframes the traditional VDI questionnaire as a lightweight product experience. Instead of collecting static inputs in Word or Excel, it guides a discovery conversation, tracks completion in real time, captures structured design signals, and produces a decision brief across Azure Virtual Desktop, Windows 365, and hybrid scenarios.
+This project reframes the traditional VDI questionnaire as a lightweight product experience. Instead of collecting static inputs in Word or Excel, it guides a discovery conversation, tracks completion in real time, captures design signals, and produces a decision brief across Azure Virtual Desktop, Windows 365, and hybrid scenarios.
 
 The main artifact is [Virtual-Desktop-Strategy-Readiness-Assessment.html](./Virtual-Desktop-Strategy-Readiness-Assessment.html), a self-contained HTML application built for fast sharing, easy iteration, and portfolio presentation.
 
@@ -31,6 +31,16 @@ GitHub Pages entry is [index.html](./index.html), which routes directly into the
 - Progress tracking, consultant notes, and readiness indicators
 - Visual outputs powered by Chart.js and a geographic view powered by Leaflet
 - Single-file delivery model for portability and simple demos
+
+## Preview
+
+### Entry Experience
+
+![Landing page preview](./assets/landing-page.png)
+
+### Main Assessment Experience
+
+![Assessment overview preview](./assets/assessment-overview.png)
 
 ## Experience Snapshot
 
