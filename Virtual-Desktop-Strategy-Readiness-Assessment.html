@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Virtual Desktop Strategy & Readiness Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #152033;
+      --muted: #667085;
+      --line: #e5e7eb;
+      --brand: #ff6b00;
+      --brand-2: #ff8f3a;
+      --deep: #1a1a2e;
+      --ok: #16a34a;
+      --warn: #f59e0b;
+      --bad: #dc2626;
+      --w365: #0ea5e9;
+      --hybrid: #7c3aed;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: linear-gradient(180deg, #fff 0, var(--bg) 240px); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
+    body { min-height: 100vh; }
+
+    .shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.88);
+      border-bottom: 1px solid rgba(229,231,235,.9);
+    }
+
+    .hero-inner {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 16px 20px 14px;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr auto;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    .title-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .product-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,107,0,.2);
+      background: linear-gradient(90deg, rgba(255,107,0,.12), rgba(255,143,58,.08));
+      color: #9a3412;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .product-byline {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #eceff3;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      transition: width .25s ease;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 14px;
+      font: inherit;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: #fff;
+      color: var(--deep);
+      border: 1px solid var(--line);
+    }
+
+    .btn-danger {
+      background: #fff0f0;
+      color: var(--bad);
+      border: 1px solid #fecaca;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 20px;
+      margin-top: 20px;
+      align-items: start;
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 18px;
+      position: sticky;
+      top: 92px;
+      z-index: 20;
+      background: rgba(247,248,251,.85);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 14px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+      position: relative;
+    }
+
+    .tab.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+
+    .tab small {
+      opacity: .8;
+      font-weight: 700;
+    }
+
+    .tab.done::after {
+      content: "✓";
+      position: absolute;
+      top: -5px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--ok);
+      color: #fff;
+      font-size: 11px;
+    }
+
+    .content {
+      margin-top: 14px;
+      padding: 20px;
+    }
+
+    .section-head {
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    .section-head p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 880px;
+    }
+
+    .section-progress {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .group {
+      margin: 0 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .group-title {
+      padding: 14px 16px;
+      background: linear-gradient(90deg, rgba(255,107,0,.08), rgba(255,107,0,0));
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .questions {
+      padding: 8px 14px 16px;
+    }
+
+    .q {
+      padding: 14px 6px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .q:last-child {
+      border-bottom: 0;
+    }
+
+    .q.hidden {
+      display: none;
+    }
+
+    .q-top {
+      display: flex;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .q-label {
+      flex: 1;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .q-help {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+      line-height: 1.45;
+    }
+
+    .tip {
+      width: 20px;
+      min-width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--brand);
+      font-size: 12px;
+      position: relative;
+      cursor: help;
+    }
+
+    .tip:hover .tipbox {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -6px);
+    }
+
+    .tipbox {
+      position: absolute;
+      left: 50%;
+      bottom: 100%;
+      width: 240px;
+      background: var(--deep);
+      color: #fff;
+      padding: 10px 11px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.45;
+      transform: translate(-50%, 0);
+      opacity: 0;
+      pointer-events: none;
+      transition: .18s ease;
+      box-shadow: var(--shadow);
+      z-index: 50;
+    }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+    }
+
+    .inline-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      width: 100%;
+      padding: 12px 13px;
+      border-radius: 12px;
+      border: 1px solid #dbe2ea;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 3px solid rgba(255,107,0,.14);
+      border-color: var(--brand);
+    }
+
+    textarea {
+      min-height: 94px;
+      resize: vertical;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .choice-list--compact {
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+    }
+
+    .choice {
+      display: flex;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border: 1px solid #edf1f5;
+      border-radius: 12px;
+      background: #fafbfd;
+    }
+
+    .choice-list--compact .choice {
+      min-height: 100%;
+      padding: 11px 12px;
+    }
+
+    .choice input {
+      margin-top: 2px;
+      accent-color: var(--brand);
+    }
+
+    .persona-card {
+      margin-top: 14px;
+      border: 1px solid #ffd3b4;
+      background: linear-gradient(180deg, #fff9f4, #fff);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .persona-card h4 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .aside {
+      position: sticky;
+      top: 96px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .aside-card {
+      padding: 16px;
+    }
+
+    .aside-card h3 {
+      margin: 0 0 14px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .signal {
+      display: grid;
+      grid-template-columns: 60px 1fr 44px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .bar {
+      height: 14px;
+      border-radius: 999px;
+      background: #edf2f7;
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      transition: width .25s ease;
+    }
+
+    .bar-avd span { background: linear-gradient(90deg, var(--brand), #ff944d); }
+    .bar-w365 span { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+    .bar-hybrid span { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
+
+    .result-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      font-weight: 800;
+      margin-top: 10px;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #fff, #fbfdff);
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .kpi-value {
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      color: var(--brand);
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1.1fr .9fr;
+    }
+
+    .summary-card {
+      padding: 16px;
+    }
+
+    .summary-card h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-item {
+      border: 1px solid #edf2f7;
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .summary-item b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .muted { color: var(--muted); }
+    .tbc { color: var(--bad); font-style: italic; }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .chart-card {
+      padding: 16px;
+    }
+
+    .chart-box {
+      height: 280px;
+      position: relative;
+    }
+
+    #geoMap {
+      height: 320px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .notes {
+      margin-top: 14px;
+      border: 1px dashed #fdba74;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .notes summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      background: #fff7ed;
+      font-weight: 800;
+      color: #9a3412;
+    }
+
+    .notes summary::-webkit-details-marker { display: none; }
+    .notes-body { padding: 14px; }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 1180px) {
+      .layout { grid-template-columns: 1fr; }
+      .aside { position: static; }
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-actions { justify-content: flex-start; }
+      .summary-grid, .charts { grid-template-columns: 1fr; }
+      .title-meta { align-items: flex-start; }
+    }
+
+    @media (max-width: 720px) {
+      .shell { padding: 12px; }
+      .content { padding: 14px; }
+      .tabs { padding: 12px; top: 122px; }
+      .tab { width: 100%; justify-content: space-between; }
+      .kpi-value { font-size: 24px; }
+    }
+
+    @media print {
+      .hero, .tabs, .aside, .footer-actions, .notes, .charts, #geoMap {
+        display: none !important;
+      }
+      body, html {
+        background: #fff;
+      }
+      .shell, .content, .panel {
+        padding: 0;
+        margin: 0;
+        box-shadow: none;
+        border: 0;
+      }
+      #tab-summary {
+        display: block !important;
+      }
+      .tab-panel {
+        display: none !important;
+      }
+      .tab-panel.summary-only {
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="title">
+        <div class="title-meta">
+          <span class="product-badge">Product Concept</span>
+          <span class="product-byline">Interactive decision support for desktop virtualization strategy</span>
+        </div>
+        <h1>Virtual Desktop Strategy & Readiness Assessment</h1>
+        <p>Interactive assessment for surfacing platform fit, migration risk, and design-ready inputs across Azure Virtual Desktop, Windows 365, and hybrid virtual desktop initiatives.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span>Overall completion</span>
+          <span id="overallPct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="overallFill"></div></div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-ghost" id="btnExport">Export JSON</button>
+        <button class="btn-ghost" id="btnPrint">Print Brief</button>
+        <button class="btn-danger" id="btnReset">Clear Session</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <div class="layout">
+      <main class="main">
+        <nav class="tabs panel" id="tabs"></nav>
+        <section class="content panel" id="content"></section>
+      </main>
+
+      <aside class="aside">
+        <section class="aside-card panel">
+          <h3>Live Recommendation</h3>
+          <div class="signal">
+            <strong>AVD</strong>
+            <div class="bar bar-avd"><span id="barAvd"></span></div>
+            <strong id="pctAvd">0%</strong>
+          </div>
+          <div class="signal">
+            <strong>W365</strong>
+            <div class="bar bar-w365"><span id="barW365"></span></div>
+            <strong id="pctW365">0%</strong>
+          </div>
+          <div class="signal">
+            <strong>Hybrid</strong>
+            <div class="bar bar-hybrid"><span id="barHybrid"></span></div>
+            <strong id="pctHybrid">0%</strong>
+          </div>
+          <div class="result-chip" id="winnerChip">Current best fit: Insufficient data</div>
+          <p class="muted" style="margin:10px 0 0;font-size:13px;">This is a directional signal based on answers entered so far. It is not a substitute for full architectural validation.</p>
+        </section>
+
+        <section class="aside-card panel">
+          <h3>Readiness Snapshot</h3>
+          <div id="readinessList" class="summary-list"></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "virtual-desktop-strategy-readiness-v1";
+
+    const regionPins = {
+      "UK": [51.5074, -0.1278],
+      "Europe": [50.1109, 8.6821],
+      "Americas": [40.7128, -74.0060],
+      "APAC": [1.3521, 103.8198],
+      "MEA": [25.2048, 55.2708],
+      "UK South": [50.7184, -3.5339],
+      "North Europe": [53.3498, -6.2603],
+      "West Europe": [52.3676, 4.9041],
+      "Canada Central": [43.6532, -79.3832],
+      "East US": [37.4316, -78.6569],
+      "East US 2": [36.8508, -76.2859],
+      "Central US": [41.2565, -95.9345],
+      "West US": [37.7749, -122.4194],
+      "West US 3": [33.4484, -112.0740],
+      "Brazil South": [-23.5505, -46.6333],
+      "Australia East": [-33.8688, 151.2093],
+      "Central India": [18.5204, 73.8567],
+      "Japan East": [35.6762, 139.6503],
+      "South East Asia": [1.3521, 103.8198],
+      "Southeast Asia": [1.3521, 103.8198],
+      "UAE North": [25.2048, 55.2708]
+    };
+
+    const tabs = [
+      {
+        id: "tab-overview",
+        icon: "🏢",
+        title: "Client Overview & Context",
+        desc: "Capture organisation profile, commercial context, deployment type, user scope, and Microsoft estate baseline.",
+        groups: [
+          {
+            title: "Organisation & Business Drivers",
+            questions: [
+              q("orgName", "Organisation name", "text", { tip: "Use the legal or trading name relevant to the engagement." }),
+              q("industry", "Industry vertical", "select", { options: ["Finance", "Healthcare", "Retail", "Manufacturing", "Public Sector", "Professional Services", "Education", "Other"], tip: "Industry affects compliance, security posture, and workload profile." }),
+              q("employeeCount", "Total employee headcount", "number", { tip: "Organisation-wide headcount, not only VDI users." }),
+              q("vdiUsers", "Users requiring virtual desktop access", "number", { tip: "Include employees, contractors, contingent workers, and seasonal staff." }),
+              q("siteCount", "Number of office / site locations", "number", { tip: "Used to assess connectivity and operational spread." }),
+              q("regions", "Primary user geographies", "checkbox", { options: ["UK", "Europe", "Americas", "APAC", "MEA"], tip: "Select all major geographies with material VDI user populations." }),
+              q("deploymentType", "Deployment type", "radio", { options: ["Greenfield", "Migration from existing VDI", "Optimise existing AVD or Windows 365"], tip: "Determines migration-specific discovery depth." }),
+              q("migrationPlatform", "Current VDI platform", "select", { options: ["Citrix DaaS", "Citrix Virtual Apps and Desktops", "VMware Horizon", "Microsoft RDS", "Amazon WorkSpaces", "Other"], when: s => s.deploymentType === "Migration from existing VDI", tip: "Platform source influences app migration, image strategy, and user profile approach." }),
+              q("goLiveDate", "Target go-live date", "date", { tip: "If unknown, leave blank and capture in notes." }),
+              q("businessDrivers", "Primary business drivers", "checkbox", { options: ["Cost reduction", "Remote / hybrid work", "Security uplift", "Data residency", "Platform exit / end of life", "M&A / consolidation", "Business continuity", "User experience improvement"], tip: "Multiple drivers can be selected." }),
+              q("eaStatus", "Existing Microsoft Enterprise Agreement", "radio", { options: ["Yes", "No", "Not sure"], tip: "Commercial model influences licensing approach and procurement route." }),
+              q("m365Tier", "Existing Microsoft 365 licence tier", "select", { options: ["Business Basic", "Business Standard", "Business Premium", "M365 E3", "M365 E5", "Mixed estate", "None / unknown"], tip: "Used to estimate AVD and W365 licensing readiness." }),
+              q("hybridBenefit", "Azure Hybrid Benefit applicable", "radio", { options: ["Yes", "No", "Not sure"], tip: "Windows Server licences with active Software Assurance can materially reduce AVD compute cost." })
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-personas",
+        icon: "👥",
+        title: "User Personas & Workloads",
+        desc: "Define persona mix, session types, concurrency patterns, performance expectations, and mobility requirements.",
+        groups: [
+          {
+            title: "Persona Strategy",
+            questions: [
+              q("personaCount", "How many distinct user personas exist", "number", { tip: "A persona is a unique user group with shared app, performance, and support needs." }),
+              q("namedVsPooled", "Overall desktop model preference", "radio", { options: ["Mostly named / personal desktops", "Mostly pooled / shared sessions", "Mixed estate required"], tip: "Named desktops typically increase W365 fit. Shared sessions typically increase AVD fit." }),
+              q("offlineNeed", "Any personas requiring offline / disconnected work", "radio", { options: ["Yes", "No", "Not sure"], tip: "Offline need strongly favours Windows 365 or a hybrid pattern." }),
+              q("peakHours", "Typical peak usage model", "checkbox", { options: ["Standard business hours", "Extended shifts", "24/7 operations", "Seasonal spikes", "Burst event-driven demand"], tip: "Burst and shift patterns increase the value of autoscaling and pooled models." }),
+              q("remotePattern", "Predominant work pattern", "radio", { options: ["Mostly remote", "Hybrid remote and office", "Mostly office-based"], tip: "Endpoint diversity and remote access posture vary significantly across work patterns." })
+            ]
+          }
+        ],
+        dynamicPersonas: true
+      },
+      {
+        id: "tab-apps",
+        icon: "📦",
+        title: "Application Landscape & Compatibility",
+        desc: "Capture application estate, delivery method, compatibility constraints, packaging status, and migration complexity.",
+        groups: [
+          {
+            title: "Application Estate",
+            questions: [
+              q("appCount", "Estimated number of applications delivered via VDI", "number", { tip: "Include published apps, full desktop workloads, line-of-business apps, and browser-only business apps if material." }),
+              q("appDelivery", "Preferred delivery model", "checkbox", { options: ["Full desktop", "Published applications / RemoteApp", "Browser-first / SaaS", "Mixed"], tip: "Mixed delivery can indicate hybrid app delivery requirements." }),
+              q("legacyApps", "Any legacy or unsupported applications", "radio", { options: ["Yes", "No", "Not known"], tip: "Legacy apps can require compatibility testing, packaging, or isolation." }),
+              q("adminRights", "Any applications requiring local admin rights", "radio", { options: ["Yes", "No", "Not known"], tip: "This impacts endpoint and session host hardening." }),
+              q("usbDongle", "Any applications with USB dongles or hardware lock", "radio", { options: ["Yes", "No"], tip: "USB redirection can be a design and support consideration." }),
+              q("mediaApps", "Any multimedia, real-time AV, or graphics-heavy apps", "radio", { options: ["Yes", "No"], tip: "Teams AV, video, CAD, and rendering workloads often change solution fit and VM size." }),
+              q("appHosting", "Primary business app hosting location", "radio", { options: ["Mostly SaaS", "Mostly on-premises", "Mixed"], tip: "On-prem app dependencies materially affect networking design." }),
+              q("compatAssessment", "Application compatibility assessment status", "radio", { options: ["Completed", "Partial", "Not started"], tip: "A missing app assessment increases discovery and migration risk." }),
+              q("m365Apps", "Microsoft 365 Apps approach", "radio", { options: ["Installed in image", "Per-user subscription", "Not required"], tip: "Used in image and profile design." }),
+              q("migrationPackaging", "If migrating, existing packaging approach", "checkbox", { options: ["MSI", "App-V", "MSIX", "ThinApp", "Citrix app layering", "Other / manual"], when: s => s.deploymentType === "Migration from existing VDI", tip: "Existing app packaging affects migration effort." })
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-infra",
+        icon: "🌐",
+        title: "Infrastructure & Networking",
+        desc: "Understand Azure maturity, connectivity, storage, image strategy, segmentation, and performance dependencies.",
+        groups: [
+          {
+            title: "Platform Foundation",
+            questions: [
+              q("landingZone", "Existing Azure landing zone maturity", "radio", { options: ["Production-ready", "Basic subscription only", "No Azure landing zone"], tip: "Maturity affects speed, control, and security posture." }),
+              q("targetRegions", "Preferred Azure deployment regions", "checkbox", { options: ["UK South", "North Europe", "West Europe", "Canada Central", "East US 2", "Central US", "West US 3", "Brazil South", "Australia East", "Central India", "Japan East", "Southeast Asia", "UAE North"], choiceClass: "choice-list--compact", tip: "Choose all realistic target regions for user, resiliency, or compliance reasons. This list is curated to cover the most common global deployment anchors without becoming unwieldy." }),
+              q("connectivity", "Connectivity model from users to Azure", "checkbox", { options: ["Internet only", "ExpressRoute", "Site-to-site VPN", "SD-WAN", "MPLS / WAN"], tip: "Helps determine latency, resilience, and dependency complexity." }),
+              q("bandwidth", "Typical bandwidth available per user", "select", { options: ["< 2 Mbps", "2-5 Mbps", "5-10 Mbps", "10-25 Mbps", "> 25 Mbps", "Unknown"], tip: "Bandwidth and latency are both critical for user experience." }),
+              q("latency", "Typical latency to target Azure region", "select", { options: ["< 20 ms", "20-50 ms", "50-100 ms", "> 100 ms", "Not tested"], tip: "Latency above 50 ms can be workable, but often reduces perceived responsiveness." }),
+              q("adPresence", "Existing directory estate", "radio", { options: ["Entra ID only", "On-prem AD DS only", "Hybrid AD DS + Entra ID", "Other / mixed"], tip: "Identity architecture is a major decision input for AVD and W365." }),
+              q("dnsStrategy", "DNS strategy for VDI workloads", "radio", { options: ["Azure native", "On-premises DNS", "Hybrid DNS", "Not decided"], tip: "DNS can become a common hidden dependency, especially with on-prem apps and files." }),
+              q("segmentation", "Network segmentation approach", "radio", { options: ["NSGs / Azure Firewall", "Third-party NVA", "Minimal / none", "Not decided"], tip: "Segmentation and egress control influence security posture and complexity." }),
+              q("profileStorage", "Primary profile / file strategy", "radio", { options: ["FSLogix cloud-only", "On-prem SMB shares", "Azure Files", "Azure NetApp Files", "Not decided"], tip: "Profile and file strategy is central to both user experience and DR." }),
+              q("profileSize", "Average profile size per user in GB", "number", { tip: "Typical enterprise ranges vary from 5 GB to more than 50 GB, depending on profile discipline." }),
+              q("imageApproach", "Image management approach", "radio", { options: ["Marketplace image", "Custom golden image", "Azure Image Builder pipeline", "Not decided"], tip: "Custom image pipelines add flexibility but increase operational overhead." }),
+              q("autoscale", "Autoscaling preference", "radio", { options: ["Scale to zero", "Scale to minimum floor", "Always on", "Not decided"], tip: "Strongly influences AVD economics." })
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-security",
+        icon: "🔐",
+        title: "Identity, Security & Compliance",
+        desc: "Discover identity posture, Zero Trust controls, redirection restrictions, data sensitivity, and regulatory obligations.",
+        groups: [
+          {
+            title: "Identity & Access",
+            questions: [
+              q("identityProvider", "Primary identity provider(s)", "checkbox", { options: ["Entra ID", "AD DS", "ADFS", "Okta", "Ping", "Other"], tip: "Hybrid or federated identity shapes join type, auth, and policy patterns." }),
+              q("syncModel", "Hybrid identity sync model", "radio", { options: ["Entra Connect", "Cloud Sync", "None", "Not sure"], when: s => ["On-prem AD DS only", "Hybrid AD DS + Entra ID"].includes(s.adPresence), tip: "Only shown when an on-prem directory estate is present." }),
+              q("mfa", "MFA enforcement status", "radio", { options: ["Comprehensive", "Partial", "None"], tip: "Baseline security input." }),
+              q("condAccess", "Conditional Access maturity", "radio", { options: ["Comprehensive", "Basic", "None"], tip: "Used as an indicator of operational readiness and endpoint trust enforcement." }),
+              q("pim", "Privileged Identity Management in use", "radio", { options: ["Yes", "No", "Planned"], tip: "Signals governance maturity for admin access." }),
+              q("defender", "Microsoft Defender coverage", "radio", { options: ["Defender full estate", "Partial coverage", "No Defender"], tip: "Signals device and session host protection maturity." }),
+              q("siem", "Security monitoring / SIEM", "radio", { options: ["Microsoft Sentinel", "Third-party SIEM", "No central SIEM"], tip: "Impacts monitoring, incident response, and proposal scope." })
+            ]
+          },
+          {
+            title: "Compliance & Data Protection",
+            questions: [
+              q("dataClass", "Data classification accessed through VDI", "checkbox", { options: ["Public", "Internal", "Confidential", "Highly regulated"], tip: "More than one class may apply across personas." }),
+              q("redirection", "Clipboard / print / USB restrictions needed", "radio", { options: ["Strict lockdown", "Partial restrictions", "No restrictions"], tip: "High control needs often increase policy and support complexity." }),
+              q("screenProtection", "Watermarking or screen capture prevention required", "radio", { options: ["Yes", "No", "Not sure"], tip: "Relevant for regulated and sensitive data environments." }),
+              q("regulations", "Applicable regulations / standards", "checkbox", { options: ["GDPR", "ISO 27001", "SOC 2", "PCI-DSS", "HIPAA", "FCA / PRA", "NIST", "CIS", "Other"], tip: "Used to shape landing zone, logging, retention, and region recommendations." }),
+              q("residency", "Data residency requirement", "radio", { options: ["UK only", "EU only", "Country-specific", "No strict residency requirement"], tip: "Can constrain region selection and data placement." }),
+              q("penTest", "Pre-go-live security assessment required", "radio", { options: ["Yes", "No", "Already planned"], tip: "Useful for scoping post-build validation work." })
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-endpoints",
+        icon: "💻",
+        title: "Endpoint & Device Management",
+        desc: "Define endpoint estate, management tooling, BYOD stance, peripheral dependencies, and session mobility expectations.",
+        groups: [
+          {
+            title: "Endpoint Estate",
+            questions: [
+              q("endpointTypes", "Primary endpoint types", "checkbox", { options: ["Managed Windows PCs", "Unmanaged Windows PCs", "Mac", "Thin clients", "Chromebook", "iPad / iOS", "Android", "Browser-only"], tip: "Endpoint diversity affects support effort and access methods." }),
+              q("mdm", "Endpoint management platform(s)", "checkbox", { options: ["Intune", "Configuration Manager", "Jamf", "Other MDM", "None"], tip: "Strong Intune maturity can improve solution fit and operational posture." }),
+              q("byod", "BYOD access policy", "radio", { options: ["Allowed with controls", "Allowed with minimal controls", "Not allowed", "Under review"], tip: "BYOD changes conditional access and app protection needs." }),
+              q("thinClientRefresh", "Thin client refresh or rationalisation needed", "radio", { options: ["Yes", "No", "Partial"], tip: "Useful for migration or endpoint refresh scoping." }),
+              q("autopilot", "Windows Autopilot / zero-touch deployment in use", "radio", { options: ["Yes", "No", "Planned"], tip: "Signals endpoint operational maturity." }),
+              q("peripherals", "Required peripherals", "checkbox", { options: ["Webcam", "Headset / audio", "USB storage", "Smart card", "Signature pad", "Label printer", "Barcode scanner", "Specialist devices"], tip: "Specialist peripherals can be a hidden design blocker." }),
+              q("printModel", "Remote printing approach", "radio", { options: ["Universal Print", "Legacy redirected printing", "No remote print"], tip: "Legacy printing often increases network and support complexity." }),
+              q("sessionRoam", "Users need session continuity across devices", "radio", { options: ["Yes", "Nice to have", "No"], tip: "Often points to profile and identity design patterns." }),
+              q("sharedDevices", "Shared / kiosk endpoints in scope", "radio", { options: ["Yes", "No", "Not sure"], tip: "Shared endpoints can affect persona and policy design." })
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-performance",
+        icon: "⚡",
+        title: "Performance, Scalability & DR",
+        desc: "Capture concurrency, sizing expectations, service level targets, recovery targets, and resilience posture.",
+        groups: [
+          {
+            title: "Capacity & Performance",
+            questions: [
+              q("peakConcurrent", "Peak concurrent users", "number", { tip: "More important for sizing than total entitled users." }),
+              q("avgCpu", "Average per-user CPU expectation", "select", { options: ["2 vCPU", "4 vCPU", "8 vCPU", "> 8 vCPU", "Unknown"], tip: "Use workload tests where available. Otherwise capture best estimate." }),
+              q("avgRam", "Average per-user RAM expectation", "select", { options: ["2 GB", "4 GB", "8 GB", "16 GB", "> 16 GB", "Unknown"], tip: "Useful for initial right-sizing." }),
+              q("gpuNeed", "Any persona requiring GPU acceleration", "radio", { options: ["Yes", "No", "Not sure"], tip: "GPU need often pushes recommendation toward AVD or hybrid." }),
+              q("loadTest", "Load / performance testing already completed", "radio", { options: ["Yes", "No", "Required"], tip: "If not done, highlight as a design and risk mitigation activity." }),
+              q("updateFreq", "Image / patch cadence", "radio", { options: ["Weekly", "Monthly", "Quarterly", "Ad hoc"], tip: "Operational pattern affects image design and managed service shape." })
+            ]
+          },
+          {
+            title: "Availability & Recovery",
+            questions: [
+              q("sla", "Target service availability", "radio", { options: ["99.5%", "99.9%", "99.95%", "99.99%", "Not defined"], tip: "Higher availability targets materially increase design complexity and cost." }),
+              q("drPattern", "Preferred disaster recovery pattern", "radio", { options: ["Warm standby secondary region", "Cold restore", "Active-active", "No formal DR", "Not decided"], tip: "DR pattern strongly influences region count, storage, and operating model." }),
+              q("rto", "Target RTO", "select", { options: ["< 1 hour", "1-4 hours", "4-8 hours", "8-24 hours", "> 24 hours", "Not defined"], tip: "Recovery Time Objective determines required failover posture." }),
+              q("rpo", "Target RPO", "select", { options: ["Near zero", "< 1 hour", "1-4 hours", "> 4 hours", "Not defined"], tip: "Recovery Point Objective indicates acceptable data loss window." }),
+              q("bcp", "Business continuity plan documented", "radio", { options: ["Yes", "No", "In progress"], tip: "Signals organisational preparedness and transition quality." }),
+              q("scalePattern", "Expected demand profile", "checkbox", { options: ["Stable baseline", "Daily peaks", "Weekly cycles", "Monthly spikes", "Seasonal peaks", "Unpredictable bursts"], tip: "Used to shape autoscale and pooled model economics." })
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-licensing",
+        icon: "💰",
+        title: "Licensing, Cost & Governance",
+        desc: "Gather current cost position, licensing posture, procurement route, governance model, and financial targets.",
+        groups: [
+          {
+            title: "Commercial & Governance Inputs",
+            questions: [
+              q("currentVdiCost", "Current annual VDI cost estimate", "number", { tip: "Optional. Use the client currency and capture context in notes." }),
+              q("costGoal", "Cost ambition", "radio", { options: ["> 30% reduction", "10-30% reduction", "Cost neutral", "Outcome-driven rather than cost-driven", "Unknown"], tip: "Helps balance commercial and technical recommendations." }),
+              q("clientOwnsLicences", "Microsoft licensing already owned for target users", "radio", { options: ["Yes for all users", "Yes for some users", "No / unknown"], tip: "Used for indicative AVD and Windows 365 cost signals." }),
+              q("serverSA", "Windows Server licences with Software Assurance", "radio", { options: ["Yes", "No", "Unknown"], tip: "Hybrid Benefit can improve AVD economics materially." }),
+              q("reservedModel", "Preferred Azure commit model", "radio", { options: ["Pay as you go", "1-year commitment", "3-year commitment", "Mixed", "Not decided"], tip: "Important for cost modelling and proposal assumptions." }),
+              q("chargeback", "Chargeback / showback needed", "radio", { options: ["Per user", "Per department", "No", "Not sure"], tip: "Useful for governance and managed reporting needs." }),
+              q("finops", "FinOps / cost governance capability", "radio", { options: ["Mature", "Basic", "None"], tip: "Stronger FinOps capability supports pooled and autoscaled estates." }),
+              q("budgetStatus", "Budget approval status", "radio", { options: ["Approved", "Pending", "Business case required", "Not started"], tip: "Affects proposal structure and next-step urgency." }),
+              q("procurement", "Procurement route", "radio", { options: ["EA / MCA", "CSP", "Other", "Unknown"], tip: "Influences commercial motion and who should be engaged." }),
+              q("governance", "IT governance model", "checkbox", { options: ["ITIL", "COBIT", "Agile / DevOps", "Formal CAB", "Minimal formal governance"], tip: "Governance affects change, release, and support design." })
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-org",
+        icon: "🏗️",
+        title: "Organisational Readiness & Change",
+        desc: "Assess support model, cloud skills, stakeholder sponsorship, change approach, user readiness, and rollout planning.",
+        groups: [
+          {
+            title: "Readiness & Adoption",
+            questions: [
+              q("itTeamSize", "IT team size supporting end-user computing", "number", { tip: "Useful for understanding operational capacity." }),
+              q("cloudSkill", "Azure / cloud skill level in internal IT", "radio", { options: ["Advanced", "Intermediate", "Beginner", "Little or none"], tip: "Low cloud maturity often increases the fit for simpler operating models." }),
+              q("managedService", "Target support model", "radio", { options: ["Self-managed", "Co-managed", "Fully managed service"], tip: "Affects transition, operating model, and proposal composition." }),
+              q("execSponsor", "Executive sponsorship status", "radio", { options: ["Confirmed C-level", "Confirmed director / VP", "Not confirmed", "Unknown"], tip: "A reliable sponsorship model reduces programme risk." }),
+              q("changePlan", "Change and communications plan status", "radio", { options: ["In place", "Partial", "Not started", "Expected from delivery partner"], tip: "Useful for estimating change workstream effort." }),
+              q("trainingNeed", "Training requirement", "checkbox", { options: ["Self-service guides", "Live end-user training", "Administrator training", "Service desk training", "Recorded video content", "Train-the-trainer"], tip: "Training inputs shape the non-technical scope." }),
+              q("pilotApproach", "Rollout approach", "radio", { options: ["Formal pilot then phased rollout", "Department by department", "Big bang", "Not decided"], tip: "Phased rollout often reduces migration and adoption risk." }),
+              q("helpdeskReady", "Service desk readiness for VDI", "radio", { options: ["Ready", "Partially ready", "Training required"], tip: "Operational readiness is often overlooked until late in the programme." }),
+              q("changeMethod", "Change framework", "radio", { options: ["Prosci / ADKAR", "Kotter", "Internal approach", "No formal framework"], tip: "Useful in shaping change governance and user enablement." }),
+              q("userResistance", "Expected end-user resistance", "radio", { options: ["High", "Medium", "Low", "Unknown"], tip: "High resistance often demands stronger pilot, communications, and persona work." }),
+              q("stakeholderMap", "Stakeholder mapping completed", "radio", { options: ["Yes", "No", "In progress"], tip: "Key for discovery, decision-making, and rollout sequencing." })
+            ]
+          }
+        ]
+      },
+      {
+        id: "tab-summary",
+        icon: "📋",
+        title: "Decision Brief & Design Signals",
+        desc: "Turn discovery inputs into platform fit signals, migration risks, and design-ready outputs.",
+        groups: []
+      }
+    ];
+
+    function q(id, label, type, extra = {}) {
+      return { id, label, type, ...extra };
+    }
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+
+    const state = loadState();
+    let currentTab = tabs[0].id;
+    let radarChart, readinessChart, personaChart, migrationChart, map, mapLayer, mapContainer;
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function refreshDerivedUi() {
+      updateHeader();
+      updateRecommendationPanel();
+      renderReadinessAside();
+      renderChartsAndMap();
+    }
+
+    function setValue(id, value, { rerender = true } = {}) {
+      state[id] = value;
+      saveState();
+      if (rerender) {
+        render();
+        return;
+      }
+      refreshDerivedUi();
+    }
+
+    function getValue(id) {
+      return state[id];
+    }
+
+    function isAnswered(question) {
+      const v = getValue(question.id);
+      if (Array.isArray(v)) return v.length > 0;
+      return v !== undefined && v !== null && String(v).trim() !== "";
+    }
+
+    function visible(question) {
+      if (!question.when) return true;
+      try { return !!question.when(state); } catch { return false; }
+    }
+
+    function labelFor(q, value) {
+      if (Array.isArray(value)) return value.join(", ");
+      if (value === undefined || value === null || value === "") return "To be confirmed";
+      return value;
+    }
+
+    function allQuestions() {
+      const list = [];
+      tabs.forEach(t => t.groups.forEach(g => g.questions.forEach(q => list.push(q))));
+      return list;
+    }
+
+    function tabQuestions(tab) {
+      return tab.groups.flatMap(g => g.questions).filter(visible);
+    }
+
+    function tabProgress(tab) {
+      const qs = tabQuestions(tab);
+      if (!qs.length) return 0;
+      const answered = qs.filter(isAnswered).length;
+      return Math.round(answered / qs.length * 100);
+    }
+
+    function overallProgress() {
+      const qs = allQuestions().filter(visible);
+      if (!qs.length) return 0;
+      return Math.round(qs.filter(isAnswered).length / qs.length * 100);
+    }
+
+    function recommendation() {
+      let avd = 0, w365 = 0, hybrid = 0;
+
+      const users = +state.vdiUsers || 0;
+      const peak = +state.peakConcurrent || 0;
+      const cloudSkill = state.cloudSkill || "";
+      const deploymentType = state.deploymentType || "";
+      const named = state.namedVsPooled || "";
+      const offline = state.offlineNeed || "";
+      const landingZone = state.landingZone || "";
+      const profileStorage = state.profileStorage || "";
+      const appHosting = state.appHosting || "";
+      const mediaApps = state.mediaApps || "";
+      const gpu = state.gpuNeed || "";
+      const ad = state.adPresence || "";
+      const autoscale = state.autoscale || "";
+      const managed = state.managedService || "";
+      const endpointTypes = state.endpointTypes || [];
+
+      if (users > 500) avd += 20;
+      if (users > 100 && users <= 500) hybrid += 14;
+      if (users > 0 && users < 100) w365 += 16;
+
+      if (peak > 0 && users > 0 && peak < users * 0.7) avd += 14;
+      if (peak > 0 && users > 0 && peak >= users * 0.85) w365 += 10;
+
+      if (named === "Mostly named / personal desktops") w365 += 18;
+      if (named === "Mostly pooled / shared sessions") avd += 22;
+      if (named === "Mixed estate required") hybrid += 20;
+
+      if (offline === "Yes") w365 += 18;
+      if (offline === "No") avd += 5;
+
+      if (deploymentType === "Migration from existing VDI") { avd += 12; hybrid += 12; }
+      if (deploymentType === "Greenfield") w365 += 6;
+
+      if (landingZone === "Production-ready") avd += 14;
+      if (landingZone === "No Azure landing zone") w365 += 14;
+
+      if (profileStorage === "On-prem SMB shares" || appHosting === "Mostly on-premises") { avd += 10; hybrid += 10; }
+      if (profileStorage === "FSLogix cloud-only") avd += 8;
+
+      if (mediaApps === "Yes" || gpu === "Yes") avd += 24;
+      if (gpu === "Not sure") hybrid += 8;
+
+      if (ad === "Hybrid AD DS + Entra ID" || ad === "On-prem AD DS only") { avd += 10; hybrid += 8; }
+      if (ad === "Entra ID only") w365 += 10;
+
+      if (autoscale === "Scale to zero" || autoscale === "Scale to minimum floor") avd += 14;
+      if (managed === "Fully managed service") w365 += 10;
+      if (cloudSkill === "Little or none" || cloudSkill === "Beginner") w365 += 12;
+      if (cloudSkill === "Advanced") avd += 6;
+
+      if (endpointTypes.includes("Thin clients")) avd += 6;
+      if (endpointTypes.includes("Browser-only")) w365 += 6;
+
+      if (state.userResistance === "High") hybrid += 8;
+      if (state.costGoal === "> 30% reduction" && autoscale !== "Always on") avd += 8;
+      if (state.clientOwnsLicences === "Yes for all users") { avd += 5; w365 += 5; }
+
+      const total = avd + w365 + hybrid || 1;
+      const pct = {
+        avd: Math.round(avd / total * 100),
+        w365: Math.round(w365 / total * 100),
+        hybrid: Math.round(hybrid / total * 100)
+      };
+
+      const winner = pct.avd >= pct.w365 && pct.avd >= pct.hybrid
+        ? "Azure Virtual Desktop"
+        : pct.w365 >= pct.avd && pct.w365 >= pct.hybrid
+          ? "Windows 365"
+          : "Hybrid AVD + Windows 365";
+
+      return { ...pct, winner };
+    }
+
+    function domainReadiness() {
+      return tabs.slice(0, -1).map(tab => ({
+        title: tab.title,
+        pct: tabProgress(tab)
+      }));
+    }
+
+    function estimateLicensing() {
+      const users = +state.vdiUsers || 0;
+      const m365 = state.m365Tier || "";
+      const hasM365 = ["Business Premium", "M365 E3", "M365 E5", "Mixed estate"].includes(m365);
+      const ahb = state.hybridBenefit === "Yes";
+      const reserved = state.reservedModel === "1-year commitment" || state.reservedModel === "3-year commitment";
+
+      const avdPerUser = Math.max(16, (hasM365 ? 14 : 28) + (ahb ? -4 : 6) + (reserved ? -2 : 4));
+      const w365PerUser = Math.max(28, hasM365 ? 42 : 58);
+      const avdMonthly = users * avdPerUser;
+      const w365Monthly = users * w365PerUser;
+      return { avdMonthly, w365Monthly };
+    }
+
+    function personaCards() {
+      const count = Math.max(0, Math.min(10, +(state.personaCount || 0)));
+      const list = [];
+      for (let i = 1; i <= count; i++) {
+        list.push({
+          name: `persona_${i}_name`,
+          seats: `persona_${i}_seats`,
+          session: `persona_${i}_session`,
+          workload: `persona_${i}_workload`,
+          gpu: `persona_${i}_gpu`,
+          usage: `persona_${i}_usage`,
+          assignment: `persona_${i}_assignment`
+        });
+      }
+      return list;
+    }
+
+    function renderTabs() {
+      const el = document.getElementById("tabs");
+      el.innerHTML = tabs.map(tab => {
+        const pct = tab.id === "tab-summary" ? overallProgress() : tabProgress(tab);
+        const active = tab.id === currentTab ? "active" : "";
+        const done = pct === 100 ? "done" : "";
+        return `<button class="tab ${active} ${done}" data-tab="${tab.id}">
+          <span>${tab.icon}</span>
+          <span>${tab.title}</span>
+          <small>${pct}%</small>
+        </button>`;
+      }).join("");
+      el.querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentTab = btn.dataset.tab;
+          render();
+        });
+      });
+    }
+
+    function renderControl(q) {
+      const v = getValue(q.id);
+      if (q.type === "text") {
+        return `<input type="text" data-id="${q.id}" value="${escapeHtml(v || "")}">`;
+      }
+      if (q.type === "number") {
+        return `<input type="number" data-id="${q.id}" value="${escapeHtml(v || "")}">`;
+      }
+      if (q.type === "date") {
+        return `<input type="date" data-id="${q.id}" value="${escapeHtml(v || "")}">`;
+      }
+      if (q.type === "select") {
+        return `<select data-id="${q.id}">
+          <option value="">Select an option</option>
+          ${q.options.map(opt => `<option value="${escapeAttr(opt)}" ${v === opt ? "selected" : ""}>${escapeHtml(opt)}</option>`).join("")}
+        </select>`;
+      }
+      if (q.type === "radio") {
+        return `<div class="choice-list ${q.choiceClass || ""}">
+          ${q.options.map(opt => `<label class="choice"><input type="radio" name="${q.id}" data-id="${q.id}" value="${escapeAttr(opt)}" ${v === opt ? "checked" : ""}><span>${escapeHtml(opt)}</span></label>`).join("")}
+        </div>`;
+      }
+      if (q.type === "checkbox") {
+        const arr = Array.isArray(v) ? v : [];
+        return `<div class="choice-list ${q.choiceClass || ""}">
+          ${q.options.map(opt => `<label class="choice"><input type="checkbox" data-id="${q.id}" value="${escapeAttr(opt)}" ${arr.includes(opt) ? "checked" : ""}><span>${escapeHtml(opt)}</span></label>`).join("")}
+        </div>`;
+      }
+      return "";
+    }
+
+    function renderQuestion(q) {
+      const hidden = !visible(q) ? "hidden" : "";
+      return `<div class="q ${hidden}" data-question="${q.id}">
+        <div class="q-top">
+          <div class="q-label">
+            ${escapeHtml(q.label)}
+            ${q.help ? `<div class="q-help">${escapeHtml(q.help)}</div>` : ""}
+          </div>
+          ${q.tip ? `<div class="tip">i<div class="tipbox">${escapeHtml(q.tip)}</div></div>` : ""}
+        </div>
+        <div class="controls">${renderControl(q)}</div>
+      </div>`;
+    }
+
+    function renderDynamicPersonas() {
+      const count = Math.max(0, Math.min(10, +(state.personaCount || 0)));
+      if (!count) return "";
+      let html = "";
+      for (let i = 1; i <= count; i++) {
+        html += `<div class="persona-card">
+          <h4>Persona ${i}</h4>
+          <div class="inline-grid">
+            <div>
+              <label class="q-label">Persona name</label>
+              <input type="text" data-id="persona_${i}_name" value="${escapeHtml(state[`persona_${i}_name`] || "")}">
+            </div>
+            <div>
+              <label class="q-label">Seat count</label>
+              <input type="number" data-id="persona_${i}_seats" value="${escapeHtml(state[`persona_${i}_seats`] || "")}">
+            </div>
+            <div>
+              <label class="q-label">Session type</label>
+              <select data-id="persona_${i}_session">
+                ${selectOptions(["Select an option", "Pooled multi-session", "Personal persistent desktop", "Personal non-persistent desktop"], state[`persona_${i}_session`])}
+              </select>
+            </div>
+            <div>
+              <label class="q-label">Primary workload</label>
+              <select data-id="persona_${i}_workload">
+                ${selectOptions(["Select an option", "Task worker", "Knowledge worker", "Developer", "Call centre", "Power user", "CAD / 3D", "Analytics / BI", "Clinical / regulated", "Other"], state[`persona_${i}_workload`])}
+              </select>
+            </div>
+            <div>
+              <label class="q-label">GPU required</label>
+              <select data-id="persona_${i}_gpu">
+                ${selectOptions(["Select an option", "Yes", "No", "Not sure"], state[`persona_${i}_gpu`])}
+              </select>
+            </div>
+            <div>
+              <label class="q-label">Typical concurrency</label>
+              <select data-id="persona_${i}_usage">
+                ${selectOptions(["Select an option", "< 50%", "50-75%", "75-90%", "> 90%"], state[`persona_${i}_usage`])}
+              </select>
+            </div>
+            <div>
+              <label class="q-label">Assignment preference</label>
+              <select data-id="persona_${i}_assignment">
+                ${selectOptions(["Select an option", "Named personal", "Shared pooled", "Mixed"], state[`persona_${i}_assignment`])}
+              </select>
+            </div>
+          </div>
+        </div>`;
+      }
+      return html;
+    }
+
+    function selectOptions(options, selected) {
+      return options.map((opt, idx) => {
+        const val = idx === 0 ? "" : opt;
+        return `<option value="${escapeAttr(val)}" ${selected === val ? "selected" : ""}>${escapeHtml(opt)}</option>`;
+      }).join("");
+    }
+
+    function renderCurrentTab() {
+      const tab = tabs.find(t => t.id === currentTab);
+      if (tab.id === "tab-summary") {
+        return renderSummaryTab();
+      }
+
+      const pct = tabProgress(tab);
+      return `
+        <div class="tab-panel">
+          <div class="section-head">
+            <div>
+              <h2>${tab.icon} ${escapeHtml(tab.title)}</h2>
+              <p>${escapeHtml(tab.desc)}</p>
+            </div>
+            <div class="section-progress">Section complete: ${pct}%</div>
+          </div>
+          ${tab.groups.map(group => `
+            <section class="group">
+              <div class="group-title">${escapeHtml(group.title)}</div>
+              <div class="questions">
+                ${group.questions.map(renderQuestion).join("")}
+                ${tab.dynamicPersonas ? renderDynamicPersonas() : ""}
+              </div>
+            </section>
+          `).join("")}
+          <details class="notes">
+            <summary>Consultant notes for this section</summary>
+            <div class="notes-body">
+              <textarea data-id="notes_${tab.id}" placeholder="Capture client remarks, assumptions, blockers, open actions, or items to validate later.">${escapeHtml(state[`notes_${tab.id}`] || "")}</textarea>
+            </div>
+          </details>
+        </div>
+      `;
+    }
+
+    function renderSummaryTab() {
+      const rec = recommendation();
+      const licence = estimateLicensing();
+      const readiness = domainReadiness();
+      const personaRows = personaCards().map((p, i) => {
+        const name = state[p.name] || `Persona ${i + 1}`;
+        const seats = state[p.seats] || "TBC";
+        const workload = state[p.workload] || "TBC";
+        const session = state[p.session] || "TBC";
+        const gpu = state[p.gpu] || "TBC";
+        const fit = recommendSku(workload, gpu, session);
+        return `<div class="summary-item"><b>${escapeHtml(name)}</b>
+          Seats: ${escapeHtml(String(seats))}<br>
+          Workload: ${escapeHtml(workload)}<br>
+          Session: ${escapeHtml(session)}<br>
+          GPU: ${escapeHtml(gpu)}<br>
+          Indicative fit: ${escapeHtml(fit)}
+        </div>`;
+      }).join("") || `<div class="summary-item"><b>No personas defined yet</b><span class="tbc">Define personas on the User Personas tab.</span></div>`;
+
+      return `
+        <div class="tab-panel summary-only">
+          <div class="section-head">
+            <div>
+              <h2>📋 Decision Brief & Design Signals</h2>
+              <p>Turn discovery inputs into platform fit signals, migration risks, and design-ready outputs.</p>
+            </div>
+            <div class="section-progress">Overall completion: ${overallProgress()}%</div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi"><div class="kpi-label">VDI Users</div><div class="kpi-value">${escapeHtml(state.vdiUsers || "—")}</div></div>
+            <div class="kpi"><div class="kpi-label">Sites</div><div class="kpi-value">${escapeHtml(state.siteCount || "—")}</div></div>
+            <div class="kpi"><div class="kpi-label">Apps</div><div class="kpi-value">${escapeHtml(state.appCount || "—")}</div></div>
+            <div class="kpi"><div class="kpi-label">Peak Concurrent</div><div class="kpi-value">${escapeHtml(state.peakConcurrent || "—")}</div></div>
+            <div class="kpi"><div class="kpi-label">RTO</div><div class="kpi-value">${escapeHtml(state.rto || "—")}</div></div>
+            <div class="kpi"><div class="kpi-label">SLA</div><div class="kpi-value">${escapeHtml(state.sla || "—")}</div></div>
+          </div>
+
+          <div class="summary-grid">
+            <section class="summary-card panel">
+              <h3>Provisional recommendation</h3>
+              <div class="result-chip">Best current fit: ${escapeHtml(rec.winner)}</div>
+              <div class="summary-list" style="margin-top:12px;">
+                <div class="summary-item"><b>AVD signal</b>${rec.avd}%</div>
+                <div class="summary-item"><b>Windows 365 signal</b>${rec.w365}%</div>
+                <div class="summary-item"><b>Hybrid signal</b>${rec.hybrid}%</div>
+                <div class="summary-item"><b>Indicative monthly cost comparison</b>AVD: ${money(licence.avdMonthly)} | Windows 365: ${money(licence.w365Monthly)}</div>
+              </div>
+            </section>
+
+            <section class="summary-card panel">
+              <h3>Persona to SKU mapper</h3>
+              <div class="summary-list">${personaRows}</div>
+            </section>
+          </div>
+
+          <div class="charts">
+            <section class="chart-card panel">
+              <h3 style="margin:0 0 12px;">Domain readiness radar</h3>
+              <div class="chart-box"><canvas id="radarChart"></canvas></div>
+            </section>
+            <section class="chart-card panel">
+              <h3 style="margin:0 0 12px;">Readiness by domain</h3>
+              <div class="chart-box"><canvas id="readinessChart"></canvas></div>
+            </section>
+            <section class="chart-card panel">
+              <h3 style="margin:0 0 12px;">Persona seat distribution</h3>
+              <div class="chart-box"><canvas id="personaChart"></canvas></div>
+            </section>
+            <section class="chart-card panel">
+              <h3 style="margin:0 0 12px;">Migration complexity heatmap</h3>
+              <div class="chart-box"><canvas id="migrationChart"></canvas></div>
+            </section>
+          </div>
+
+          <section class="summary-card panel" style="margin-top:16px;">
+            <h3>Geographic view</h3>
+            <div id="geoMap"></div>
+          </section>
+
+          <div class="summary-grid" style="margin-top:16px;">
+            <section class="summary-card panel">
+              <h3>Requirements summary</h3>
+              <div class="summary-list">
+                ${summaryBlock("Business context", [
+                  pair("Organisation", state.orgName),
+                  pair("Industry", state.industry),
+                  pair("Deployment type", state.deploymentType),
+                  pair("Current platform", state.migrationPlatform),
+                  pair("Primary drivers", state.businessDrivers)
+                ])}
+                ${summaryBlock("Functional requirements", [
+                  pair("Persona count", state.personaCount),
+                  pair("Desktop model", state.namedVsPooled),
+                  pair("Offline need", state.offlineNeed),
+                  pair("Application delivery", state.appDelivery),
+                  pair("Business app hosting", state.appHosting)
+                ])}
+                ${summaryBlock("Technical requirements", [
+                  pair("Landing zone", state.landingZone),
+                  pair("Target regions", state.targetRegions),
+                  pair("Connectivity", state.connectivity),
+                  pair("Directory estate", state.adPresence),
+                  pair("Profile strategy", state.profileStorage),
+                  pair("Endpoint types", state.endpointTypes)
+                ])}
+                ${summaryBlock("Non-functional requirements", [
+                  pair("Peak concurrency", state.peakConcurrent),
+                  pair("GPU need", state.gpuNeed),
+                  pair("Availability target", state.sla),
+                  pair("DR pattern", state.drPattern),
+                  pair("RTO", state.rto),
+                  pair("RPO", state.rpo)
+                ])}
+                ${summaryBlock("Business and governance", [
+                  pair("Cost ambition", state.costGoal),
+                  pair("Licensing owned", state.clientOwnsLicences),
+                  pair("Reserved model", state.reservedModel),
+                  pair("Budget status", state.budgetStatus),
+                  pair("Procurement route", state.procurement),
+                  pair("Governance model", state.governance)
+                ])}
+                ${summaryBlock("Organisational readiness", [
+                  pair("Cloud skill", state.cloudSkill),
+                  pair("Support model", state.managedService),
+                  pair("Executive sponsor", state.execSponsor),
+                  pair("Change plan", state.changePlan),
+                  pair("Training needs", state.trainingNeed),
+                  pair("Service desk readiness", state.helpdeskReady)
+                ])}
+              </div>
+            </section>
+
+            <section class="summary-card panel">
+              <h3>Open gaps and flags</h3>
+              <div class="summary-list">
+                ${renderGaps()}
+              </div>
+            </section>
+          </div>
+
+          <div class="footer-actions">
+            <button class="btn-primary" id="btnExport2">Export JSON</button>
+            <button class="btn-ghost" id="btnPrint2">Print Brief</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function summaryBlock(title, items) {
+      return `<div class="summary-item">
+        <b>${escapeHtml(title)}</b>
+        ${items.map(i => `<div class="${i.value === "To be confirmed" ? "tbc" : ""}">${escapeHtml(i.label)}: ${escapeHtml(i.value)}</div>`).join("")}
+      </div>`;
+    }
+
+    function pair(label, value) {
+      return { label, value: formatVal(value) };
+    }
+
+    function formatVal(value) {
+      if (Array.isArray(value)) return value.length ? value.join(", ") : "To be confirmed";
+      return value && String(value).trim() !== "" ? String(value) : "To be confirmed";
+    }
+
+    function renderGaps() {
+      const keyChecks = [
+        ["Latency to Azure", state.latency],
+        ["Application compatibility assessment", state.compatAssessment],
+        ["Data residency requirement", state.residency],
+        ["Disaster recovery pattern", state.drPattern],
+        ["Budget approval status", state.budgetStatus],
+        ["Helpdesk readiness", state.helpdeskReady]
+      ];
+      return keyChecks.map(([label, value]) => {
+        const v = formatVal(value);
+        const cls = v === "To be confirmed" ? "tbc" : "";
+        return `<div class="summary-item"><b>${escapeHtml(label)}</b><div class="${cls}">${escapeHtml(v)}</div></div>`;
+      }).join("");
+    }
+
+    function recommendSku(workload, gpu, session) {
+      if (gpu === "Yes" || workload === "CAD / 3D") return "AVD NV-series / GPU-enabled session host";
+      if (workload === "Developer") return session === "Pooled multi-session" ? "AVD D/E-series pooled hosts" : "Windows 365 Enterprise 4-8 vCPU";
+      if (workload === "Task worker") return session === "Pooled multi-session" ? "AVD pooled multi-session" : "Windows 365 Frontline / lower SKU";
+      if (workload === "Knowledge worker") return "Windows 365 Enterprise 2-4 vCPU or AVD pooled";
+      if (workload === "Call centre") return "AVD pooled with Teams optimisation";
+      if (workload === "Power user" || workload === "Analytics / BI") return "AVD D/E-series or Windows 365 Enterprise higher SKU";
+      return "Assess with pilot workload profiling";
+    }
+
+    function money(n) {
+      if (!n || Number.isNaN(n)) return "TBC";
+      return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str).replaceAll("'", "&#39;");
+    }
+
+    function bindInputs() {
+      document.querySelectorAll("input[type='text'], input[type='number'], input[type='date'], textarea, select").forEach(el => {
+        el.addEventListener("input", onInput);
+        el.addEventListener("change", onInput);
+      });
+      document.querySelectorAll("input[type='radio'], input[type='checkbox']").forEach(el => {
+        el.addEventListener("change", onInput);
+      });
+
+      const btnExport = document.getElementById("btnExport");
+      const btnPrint = document.getElementById("btnPrint");
+      const btnReset = document.getElementById("btnReset");
+      if (btnExport) btnExport.onclick = exportJson;
+      if (btnPrint) btnPrint.onclick = () => { currentTab = "tab-summary"; render(); setTimeout(() => window.print(), 60); };
+      if (btnReset) btnReset.onclick = resetSession;
+
+      const btnExport2 = document.getElementById("btnExport2");
+      const btnPrint2 = document.getElementById("btnPrint2");
+      if (btnExport2) btnExport2.onclick = exportJson;
+      if (btnPrint2) btnPrint2.onclick = () => window.print();
+    }
+
+    function onInput(e) {
+      const id = e.target.dataset.id;
+      if (!id) return;
+
+      if (e.target.type === "checkbox") {
+        const values = [...document.querySelectorAll(`input[type="checkbox"][data-id="${CSS.escape(id)}"]:checked`)].map(x => x.value);
+        setValue(id, values);
+        return;
+      }
+
+      if (e.target.type === "radio") {
+        setValue(id, e.target.value);
+        return;
+      }
+
+      if (e.target.tagName === "SELECT") {
+        setValue(id, e.target.value);
+        return;
+      }
+
+      setValue(id, e.target.value, { rerender: e.type === "change" });
+    }
+
+    function exportJson() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `vdi-discovery-questionnaire-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function resetSession() {
+      if (!confirm("Clear all saved answers for this questionnaire?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      Object.keys(state).forEach(k => delete state[k]);
+      currentTab = tabs[0].id;
+      render();
+    }
+
+    function renderReadinessAside() {
+      const el = document.getElementById("readinessList");
+      el.innerHTML = domainReadiness().map(d => `
+        <div class="summary-item">
+          <b>${escapeHtml(d.title)}</b>
+          <div>${d.pct}% complete</div>
+        </div>
+      `).join("");
+    }
+
+    function updateHeader() {
+      const pct = overallProgress();
+      document.getElementById("overallPct").textContent = `${pct}%`;
+      document.getElementById("overallFill").style.width = `${pct}%`;
+    }
+
+    function updateRecommendationPanel() {
+      const rec = recommendation();
+      document.getElementById("barAvd").style.width = rec.avd + "%";
+      document.getElementById("barW365").style.width = rec.w365 + "%";
+      document.getElementById("barHybrid").style.width = rec.hybrid + "%";
+      document.getElementById("pctAvd").textContent = rec.avd + "%";
+      document.getElementById("pctW365").textContent = rec.w365 + "%";
+      document.getElementById("pctHybrid").textContent = rec.hybrid + "%";
+      document.getElementById("winnerChip").textContent = `Current best fit: ${rec.winner}`;
+    }
+
+    function disposeMap() {
+      if (map) {
+        map.remove();
+        map = null;
+      }
+      mapLayer = null;
+      mapContainer = null;
+    }
+
+    function renderChartsAndMap() {
+      if (currentTab !== "tab-summary") {
+        disposeMap();
+        return;
+      }
+
+      const readiness = domainReadiness();
+      const personaList = personaCards()
+        .map((p, i) => ({
+          name: state[p.name] || `Persona ${i + 1}`,
+          seats: +(state[p.seats] || 0)
+        }))
+        .filter(x => x.seats > 0);
+
+      const radarData = {
+        labels: readiness.map(r => r.title.replace(" & ", "\n")),
+        datasets: [{
+          label: "Completion %",
+          data: readiness.map(r => r.pct),
+          borderColor: "#ff6b00",
+          backgroundColor: "rgba(255,107,0,.18)",
+          pointBackgroundColor: "#ff6b00",
+          pointRadius: 4
+        }]
+      };
+
+      if (radarChart) radarChart.destroy();
+      radarChart = new Chart(document.getElementById("radarChart"), {
+        type: "radar",
+        data: radarData,
+        options: {
+          maintainAspectRatio: false,
+          scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { stepSize: 20 } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      if (readinessChart) readinessChart.destroy();
+      readinessChart = new Chart(document.getElementById("readinessChart"), {
+        type: "bar",
+        data: {
+          labels: readiness.map(r => shortDomain(r.title)),
+          datasets: [{
+            label: "Readiness %",
+            data: readiness.map(r => r.pct),
+            backgroundColor: readiness.map(r => r.pct >= 80 ? "#16a34a" : r.pct >= 50 ? "#f59e0b" : "#ff6b00")
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          indexAxis: "y",
+          scales: { x: { min: 0, max: 100 } },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      if (personaChart) personaChart.destroy();
+      personaChart = new Chart(document.getElementById("personaChart"), {
+        type: "bar",
+        data: {
+          labels: personaList.length ? personaList.map(x => x.name) : ["No personas entered"],
+          datasets: [{
+            label: "Seats",
+            data: personaList.length ? personaList.map(x => x.seats) : [0],
+            backgroundColor: "#0ea5e9"
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      const migrationRisk = [
+        riskScore(state.deploymentType === "Migration from existing VDI"),
+        riskScore(state.compatAssessment === "Not started"),
+        riskScore(state.legacyApps === "Yes"),
+        riskScore(state.usbDongle === "Yes"),
+        riskScore(state.appHosting === "Mostly on-premises"),
+        riskScore(state.helpdeskReady === "Training required")
+      ];
+
+      if (migrationChart) migrationChart.destroy();
+      migrationChart = new Chart(document.getElementById("migrationChart"), {
+        type: "bar",
+        data: {
+          labels: ["Migration source", "App assessment", "Legacy apps", "USB/dongle", "On-prem apps", "Support readiness"],
+          datasets: [{
+            label: "Risk score",
+            data: migrationRisk,
+            backgroundColor: migrationRisk.map(v => v > 70 ? "#dc2626" : v > 35 ? "#f59e0b" : "#16a34a")
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          scales: { y: { min: 0, max: 100 } },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      renderMap();
+    }
+
+    function riskScore(flag) {
+      return flag ? 85 : 25;
+    }
+
+    function shortDomain(title) {
+      return title
+        .replace("Client Overview & Context", "Overview")
+        .replace("User Personas & Workloads", "Personas")
+        .replace("Application Landscape & Compatibility", "Apps")
+        .replace("Infrastructure & Networking", "Infra")
+        .replace("Identity, Security & Compliance", "Security")
+        .replace("Endpoint & Device Management", "Endpoints")
+        .replace("Performance, Scalability & DR", "Perf/DR")
+        .replace("Licensing, Cost & Governance", "Cost")
+        .replace("Organisational Readiness & Change", "Readiness");
+    }
+
+    function renderMap() {
+      const mapEl = document.getElementById("geoMap");
+      if (!mapEl) {
+        disposeMap();
+        return;
+      }
+
+      if (map && mapContainer !== mapEl) {
+        disposeMap();
+      }
+
+      const picks = []
+        .concat(Array.isArray(state.regions) ? state.regions : [])
+        .concat(Array.isArray(state.targetRegions) ? state.targetRegions : []);
+
+      if (!map) {
+        map = L.map(mapEl, { zoomControl: true }).setView([20, 0], 2);
+        mapContainer = mapEl;
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
+      }
+
+      if (mapLayer) mapLayer.remove();
+      mapLayer = L.layerGroup().addTo(map);
+
+      const points = picks.filter(p => regionPins[p]).map(p => ({ label: p, coords: regionPins[p] }));
+      points.forEach(p => {
+        L.marker(p.coords).addTo(mapLayer).bindPopup(`<strong>${escapeHtml(p.label)}</strong>`);
+      });
+
+      if (points.length) {
+        const bounds = L.latLngBounds(points.map(p => p.coords));
+        map.fitBounds(bounds.pad(0.8));
+      } else {
+        map.setView([20, 0], 2);
+      }
+      setTimeout(() => map.invalidateSize(), 50);
+    }
+
+    function render() {
+      renderTabs();
+      document.getElementById("content").innerHTML = renderCurrentTab();
+      bindInputs();
+      updateHeader();
+      updateRecommendationPanel();
+      renderReadinessAside();
+      renderChartsAndMap();
+    }
+
+    render();
+  </script>
+</body>
+</html>
