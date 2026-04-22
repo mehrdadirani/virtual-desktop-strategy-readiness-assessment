@@ -653,11 +653,11 @@
     <div class="hero-inner">
       <div class="title">
         <div class="title-meta">
-          <span class="product-badge">Product Concept</span>
+          <span class="product-badge">Interactive Assessment</span>
           <span class="product-byline">Interactive decision support for desktop virtualization strategy</span>
         </div>
         <h1>Virtual Desktop Strategy & Readiness Assessment</h1>
-        <p>Interactive assessment for surfacing platform fit, migration risk, and design-ready inputs across Azure Virtual Desktop, Windows 365, and hybrid virtual desktop initiatives.</p>
+        <p>Interactive assessment for surfacing platform fit, migration risk, and planning inputs across Azure Virtual Desktop, Windows 365, and hybrid virtual desktop initiatives.</p>
       </div>
       <div class="progress-wrap">
         <div class="progress-meta">
@@ -742,13 +742,13 @@
       {
         id: "tab-overview",
         icon: "🏢",
-        title: "Client Overview & Context",
+        title: "Organisation Overview & Context",
         desc: "Capture organisation profile, commercial context, deployment type, user scope, and Microsoft estate baseline.",
         groups: [
           {
             title: "Organisation & Business Drivers",
             questions: [
-              q("orgName", "Organisation name", "text", { tip: "Use the legal or trading name relevant to the engagement." }),
+              q("orgName", "Organisation name", "text", { tip: "Use the legal or trading name for the environment being assessed." }),
               q("industry", "Industry vertical", "select", { options: ["Finance", "Healthcare", "Retail", "Manufacturing", "Public Sector", "Professional Services", "Education", "Other"], tip: "Industry affects compliance, security posture, and workload profile." }),
               q("employeeCount", "Total employee headcount", "number", { tip: "Organisation-wide headcount, not only VDI users." }),
               q("vdiUsers", "Users requiring virtual desktop access", "number", { tip: "Include employees, contractors, contingent workers, and seasonal staff." }),
@@ -847,7 +847,7 @@
               q("condAccess", "Conditional Access maturity", "radio", { options: ["Comprehensive", "Basic", "None"], tip: "Used as an indicator of operational readiness and endpoint trust enforcement." }),
               q("pim", "Privileged Identity Management in use", "radio", { options: ["Yes", "No", "Planned"], tip: "Signals governance maturity for admin access." }),
               q("defender", "Microsoft Defender coverage", "radio", { options: ["Defender full estate", "Partial coverage", "No Defender"], tip: "Signals device and session host protection maturity." }),
-              q("siem", "Security monitoring / SIEM", "radio", { options: ["Microsoft Sentinel", "Third-party SIEM", "No central SIEM"], tip: "Impacts monitoring, incident response, and proposal scope." })
+              q("siem", "Security monitoring / SIEM", "radio", { options: ["Microsoft Sentinel", "Third-party SIEM", "No central SIEM"], tip: "Impacts monitoring, incident response, and implementation scope." })
             ]
           },
           {
@@ -924,14 +924,14 @@
           {
             title: "Commercial & Governance Inputs",
             questions: [
-              q("currentVdiCost", "Current annual VDI cost estimate", "number", { tip: "Optional. Use the client currency and capture context in notes." }),
+              q("currentVdiCost", "Current annual VDI cost estimate", "number", { tip: "Optional. Use the local currency and capture any assumptions in notes." }),
               q("costGoal", "Cost ambition", "radio", { options: ["> 30% reduction", "10-30% reduction", "Cost neutral", "Outcome-driven rather than cost-driven", "Unknown"], tip: "Helps balance commercial and technical recommendations." }),
               q("clientOwnsLicences", "Microsoft licensing already owned for target users", "radio", { options: ["Yes for all users", "Yes for some users", "No / unknown"], tip: "Used for indicative AVD and Windows 365 cost signals." }),
               q("serverSA", "Windows Server licences with Software Assurance", "radio", { options: ["Yes", "No", "Unknown"], tip: "Hybrid Benefit can improve AVD economics materially." }),
-              q("reservedModel", "Preferred Azure commit model", "radio", { options: ["Pay as you go", "1-year commitment", "3-year commitment", "Mixed", "Not decided"], tip: "Important for cost modelling and proposal assumptions." }),
+              q("reservedModel", "Preferred Azure commit model", "radio", { options: ["Pay as you go", "1-year commitment", "3-year commitment", "Mixed", "Not decided"], tip: "Important for cost modelling and planning assumptions." }),
               q("chargeback", "Chargeback / showback needed", "radio", { options: ["Per user", "Per department", "No", "Not sure"], tip: "Useful for governance and managed reporting needs." }),
               q("finops", "FinOps / cost governance capability", "radio", { options: ["Mature", "Basic", "None"], tip: "Stronger FinOps capability supports pooled and autoscaled estates." }),
-              q("budgetStatus", "Budget approval status", "radio", { options: ["Approved", "Pending", "Business case required", "Not started"], tip: "Affects proposal structure and next-step urgency." }),
+              q("budgetStatus", "Budget approval status", "radio", { options: ["Approved", "Pending", "Business case required", "Not started"], tip: "Affects implementation planning and next-step urgency." }),
               q("procurement", "Procurement route", "radio", { options: ["EA / MCA", "CSP", "Other", "Unknown"], tip: "Influences commercial motion and who should be engaged." }),
               q("governance", "IT governance model", "checkbox", { options: ["ITIL", "COBIT", "Agile / DevOps", "Formal CAB", "Minimal formal governance"], tip: "Governance affects change, release, and support design." })
             ]
@@ -949,13 +949,13 @@
             questions: [
               q("itTeamSize", "IT team size supporting end-user computing", "number", { tip: "Useful for understanding operational capacity." }),
               q("cloudSkill", "Azure / cloud skill level in internal IT", "radio", { options: ["Advanced", "Intermediate", "Beginner", "Little or none"], tip: "Low cloud maturity often increases the fit for simpler operating models." }),
-              q("managedService", "Target support model", "radio", { options: ["Self-managed", "Co-managed", "Fully managed service"], tip: "Affects transition, operating model, and proposal composition." }),
-              q("execSponsor", "Executive sponsorship status", "radio", { options: ["Confirmed C-level", "Confirmed director / VP", "Not confirmed", "Unknown"], tip: "A reliable sponsorship model reduces programme risk." }),
-              q("changePlan", "Change and communications plan status", "radio", { options: ["In place", "Partial", "Not started", "Expected from delivery partner"], tip: "Useful for estimating change workstream effort." }),
+              q("managedService", "Target support model", "radio", { options: ["Self-managed", "Co-managed", "Fully managed service"], tip: "Affects transition effort and operating model complexity." }),
+              q("execSponsor", "Executive sponsorship status", "radio", { options: ["Confirmed C-level", "Confirmed director / VP", "Not confirmed", "Unknown"], tip: "Clear sponsorship usually reduces delivery risk." }),
+              q("changePlan", "Change and communications plan status", "radio", { options: ["In place", "Partial", "Not started", "Expected from external provider"], tip: "Useful for estimating change-management effort." }),
               q("trainingNeed", "Training requirement", "checkbox", { options: ["Self-service guides", "Live end-user training", "Administrator training", "Service desk training", "Recorded video content", "Train-the-trainer"], tip: "Training inputs shape the non-technical scope." }),
               q("pilotApproach", "Rollout approach", "radio", { options: ["Formal pilot then phased rollout", "Department by department", "Big bang", "Not decided"], tip: "Phased rollout often reduces migration and adoption risk." }),
-              q("helpdeskReady", "Service desk readiness for VDI", "radio", { options: ["Ready", "Partially ready", "Training required"], tip: "Operational readiness is often overlooked until late in the programme." }),
-              q("changeMethod", "Change framework", "radio", { options: ["Prosci / ADKAR", "Kotter", "Internal approach", "No formal framework"], tip: "Useful in shaping change governance and user enablement." }),
+              q("helpdeskReady", "Service desk readiness for VDI", "radio", { options: ["Ready", "Partially ready", "Training required"], tip: "Operational readiness is often overlooked until late in delivery." }),
+              q("changeMethod", "Change framework", "radio", { options: ["Prosci / ADKAR", "Kotter", "Internal approach", "No formal framework"], tip: "Useful in shaping rollout governance and user enablement." }),
               q("userResistance", "Expected end-user resistance", "radio", { options: ["High", "Medium", "Low", "Unknown"], tip: "High resistance often demands stronger pilot, communications, and persona work." }),
               q("stakeholderMap", "Stakeholder mapping completed", "radio", { options: ["Yes", "No", "In progress"], tip: "Key for discovery, decision-making, and rollout sequencing." })
             ]
@@ -965,8 +965,8 @@
       {
         id: "tab-summary",
         icon: "📋",
-        title: "Decision Brief & Design Signals",
-        desc: "Turn discovery inputs into platform fit signals, migration risks, and design-ready outputs.",
+        title: "Summary & Design Signals",
+        desc: "Turn assessment inputs into platform fit signals, migration risks, and planning outputs.",
         groups: []
       }
     ];
@@ -1316,9 +1316,9 @@
             </section>
           `).join("")}
           <details class="notes">
-            <summary>Consultant notes for this section</summary>
+            <summary>Section notes</summary>
             <div class="notes-body">
-              <textarea data-id="notes_${tab.id}" placeholder="Capture client remarks, assumptions, blockers, open actions, or items to validate later.">${escapeHtml(state[`notes_${tab.id}`] || "")}</textarea>
+              <textarea data-id="notes_${tab.id}" placeholder="Capture remarks, assumptions, blockers, open actions, or items to validate later.">${escapeHtml(state[`notes_${tab.id}`] || "")}</textarea>
             </div>
           </details>
         </div>
@@ -1349,8 +1349,8 @@
         <div class="tab-panel summary-only">
           <div class="section-head">
             <div>
-              <h2>📋 Decision Brief & Design Signals</h2>
-              <p>Turn discovery inputs into platform fit signals, migration risks, and design-ready outputs.</p>
+              <h2>📋 Summary & Design Signals</h2>
+              <p>Turn assessment inputs into platform fit signals, migration risks, and planning outputs.</p>
             </div>
             <div class="section-progress">Overall completion: ${overallProgress()}%</div>
           </div>
@@ -1579,7 +1579,7 @@
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `vdi-discovery-questionnaire-${new Date().toISOString().slice(0,10)}.json`;
+      a.download = `virtual-desktop-strategy-readiness-assessment-${new Date().toISOString().slice(0,10)}.json`;
       a.click();
       URL.revokeObjectURL(a.href);
     }
@@ -1737,7 +1737,7 @@
 
     function shortDomain(title) {
       return title
-        .replace("Client Overview & Context", "Overview")
+        .replace("Organisation Overview & Context", "Overview")
         .replace("User Personas & Workloads", "Personas")
         .replace("Application Landscape & Compatibility", "Apps")
         .replace("Infrastructure & Networking", "Infra")
