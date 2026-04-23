@@ -4,6 +4,15 @@ A browser-based assessment for evaluating Azure Virtual Desktop, Windows 365, an
 
 The main artifact is [Virtual-Desktop-Strategy-Readiness-Assessment.html](./Virtual-Desktop-Strategy-Readiness-Assessment.html). It is a self-contained HTML application that runs locally in the browser with no backend or deployment setup.
 
+## Live Demo
+
+Start here if you want to preview the assessment immediately:
+
+- Live hosted assessment: https://mehrdadirani.github.io/virtual-desktop-strategy-readiness-assessment/
+- Direct hosted HTML: https://mehrdadirani.github.io/virtual-desktop-strategy-readiness-assessment/Virtual-Desktop-Strategy-Readiness-Assessment.html
+
+If you prefer to run it locally, open `index.html` or `Virtual-Desktop-Strategy-Readiness-Assessment.html` directly from the repository.
+
 ## What It Does
 
 - Covers Azure Virtual Desktop, Windows 365, and hybrid scenarios
